@@ -1,0 +1,22 @@
+modulesSettings:
+  src/Main.luna:
+    typeRepToVisMap:
+    - - tag: TCons
+        contents:
+        - PGResult
+        - []
+      - - ! 'LunaVisualizer: base: yaml'
+        - base/yaml/yaml.html
+    currentBreadcrumb: main
+    breadcrumbsSettings:
+    - - items: []
+      - breadcrumbCameraSettings:
+          logicalToScreen: ! '[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,80.0,0.0,1.0]]'
+          screenToLogical: ! '[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,-80.0,0.0,1.0]]'
+          lastInverse: 0
+    - - items:
+        - main
+      - breadcrumbCameraSettings:
+          logicalToScreen: ! '[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[-100.0,27.0,0.0,1.0]]'
+          screenToLogical: ! '[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[100.0,-27.0,0.0,1.0]]'
+          lastInverse: 0

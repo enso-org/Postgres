@@ -1,92 +1,11 @@
-import Std.Foreign
-import Std.FFI.C.Value
+import Postgres.DB
+import Std.Foreign.C.Value
 
-class PGResult:
-    result :: Pointer None
-
-    def toCArg: self.result.toCArg
-
-    def call name ret args:
-        lookupSymbol "pq" ("PQ" + name) . call ret (args.prepend self.toCArg)
-
-    def clear:
-        self . call "clear" None []
-
-    def ntuples:
-        self . call "ntuples" CInt [] . toInt
-
-    def nfields:
-        self . call "nfields" CInt [] . toInt
-
-    def fname i:
-        self . call "fname" CString [CInt.fromInt i . toCArg] . toText
-
-    def getvalue row col:
-        self . call "getvalue" CString [CInt.fromInt row . toCArg, CInt.fromInt col . toCArg] . toText
-
-class PGConn:
-    conn :: Pointer None
-
-    def call name ret args:
-        lookupSymbol "pq" ("PQ" + name) . call ret (args.prepend self.conn.toCArg)
-
-    def status:
-        self . call "status" CInt [] . toInt
-
-    def errorMessage:
-        self . call "errorMessage" CString [] . toText
-
-    def exec command:
-        cmd = CString . fromText command
-        r = self . call "exec" (Pointer None) [cmd.toCArg]
-        cmd . free
-        PGResult r
-
-    def execParams command paramValues:
-        len = CInt.fromInt paramValues.length
-        cmd = CString.fromText command
-        argsCStr = paramValues.each CString.fromText
-        argsArr  = NullTerminatedArray CString . fromList argsCStr
-        null = nullPtr.toCArg
-        r = self . call "execParams" (Pointer None) [cmd.toCArg, len.toCArg, null, argsArr.toCArg, null, null, CInt.fromInt 0 . toCArg]
-        argsCStr.each .free
-        cmd.free
-        argsArr.free
-        PGResult r
-
-    def prepare name sql:
-        n     = CString.fromText name
-        query = CString.fromText sql
-        r = self . call "prepare" (Pointer None) [n.toCArg, query.toCArg, CInt.fromInt 0 . toCArg, nullPtr.toCArg]
-        n.free
-        query.free
-        PGResult r . clear
-
-    def execPrepared name args:
-        len = args.length
-        cargs = args . each CString.fromText
-        n = CString . fromText name
-        argsArr = NullTerminatedArray CString . fromList cargs
-        r = self . call "execPrepared" (Pointer None) [n.toCArg, CInt.fromInt len . toCArg, argsArr.toCArg, nullPtr.toCArg, nullPtr.toCArg, CInt.fromInt 0 . toCArg]
-        cargs.each .free
-        n.free
-        argsArr.free
-        PGResult r
-
-    def finish:
-        self . call "finish" None []
-
-class Postgres:
-    def connect args:
-        kws     = args . each (CString.fromText _.first)
-        kwsArr  = NullTerminatedArray CString . fromList kws
-        vals    = args . each (CString.fromText _.second)
-        valsArr = NullTerminatedArray CString . fromList vals
-        f = lookupSymbol "pq" "PQconnectdbParams"
-        r = f . call (Pointer None) [kwsArr.toCArg, valsArr.toCArg, CInt.fromInt 0 . toCArg]
-        kws  . each .free
-        vals . each .free
-        kwsArr.free
-        valsArr.free
-        PGConn r
-
+def main:
+    db = Postgres.connect [("dbname", "test"), ("user", "test")]
+    query = "INSERT INTO test_table (foo, bar, baz)
+             VALUES ($1, $2, $3)"
+    db.prepare "my_query" query
+    db.execPrepared "my_query" ["ham",  "30", "spam"]
+    db.execPrepared "my_query" ["eggs", "87", "foobar"]
+    None
