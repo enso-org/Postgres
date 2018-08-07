@@ -54,7 +54,7 @@ class PGConn:
     def errorMessage:
         self . call "errorMessage" CString [] . toText
 
-    def _mkResult r:
+    def mkResult r:
         fin = lookupSymbol "pq" ("PQclear")
         fptr = ManagedPointer None . fromPointer fin r
         PGResult fptr
@@ -63,7 +63,7 @@ class PGConn:
         cmd = CString . fromText command
         r = self . call "exec" (Pointer None) [cmd.toCArg]
         cmd . free
-        self._mkResult r
+        self.mkResult r
 
     def execParams command paramValues:
         len = CInt.fromInt paramValues.length
@@ -75,7 +75,7 @@ class PGConn:
         argsCStr.each .free
         cmd.free
         argsArr.free
-        self._mkResult r
+        self.mkResult r
 
     def prepare name sql:
         n     = CString.fromText name
@@ -83,7 +83,7 @@ class PGConn:
         r = self . call "prepare" (Pointer None) [n.toCArg, query.toCArg, CInt.fromInt 0 . toCArg, nullPtr.toCArg]
         n.free
         query.free
-        self._mkResult r
+        self.mkResult r
 
     def execPrepared name args:
         len = args.length
@@ -94,7 +94,7 @@ class PGConn:
         cargs.each .free
         n.free
         argsArr.free
-        self._mkResult r
+        self.mkResult r
 
     def finish:
         self.ptr.free
