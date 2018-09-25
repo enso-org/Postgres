@@ -3,8 +3,7 @@ import Std.Foreign.C.Value
 
 def main:
     db = Postgres.connect [("dbname", "test"), ("user", "test")]
-    query = "INSERT INTO test_table (foo, bar, baz)
-             VALUES ($1, $2, $3)"
+    query = "INSERT INTO test_table (foo, bar, baz) VALUES ($1, $2, $3)"
     db.prepare "my_query" query
     db.execPrepared "my_query" ["ham",  "30", "spam"]
     db.execPrepared "my_query" ["eggs", "87", "foobar"]
